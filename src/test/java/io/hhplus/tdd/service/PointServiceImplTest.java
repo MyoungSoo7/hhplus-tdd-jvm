@@ -82,9 +82,24 @@ class PointServiceImplTest {
     @Test
     @DisplayName("유저 포인트 충전")
     void chargeUserPoint() {
+        // given => long id, long amount
+        Long id = 1L;
+        Long amount = 1000L;
+        Long now = System.currentTimeMillis();
+
+        // when
+        UserPoint expectedUserPoint = new UserPoint(
+                id,
+                amount,
+                now
+        );
+        userPointTable.insertOrUpdate(id, amount);
 
 
-
+        // then
+        assertEquals(expectedUserPoint.id(), id);
+        assertEquals(expectedUserPoint.point(), amount);
+        assertEquals(expectedUserPoint.updateMillis(), now);
 
     }
 

@@ -22,7 +22,7 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public UserPoint chargeUserPoint(long id, long amount) {
-        return null;
+        return  userPointTable.insertOrUpdate(id, amount);
     }
 
     @Override
