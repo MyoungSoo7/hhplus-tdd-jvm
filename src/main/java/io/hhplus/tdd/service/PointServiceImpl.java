@@ -3,6 +3,7 @@ package io.hhplus.tdd.service;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.PointHistory;
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,14 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public UserPoint chargeUserPoint(long id, long amount) {
+        pointHistoryTable.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
         return  userPointTable.insertOrUpdate(id, amount);
     }
 
     @Override
     public UserPoint useUserPoint(long id, long amount) {
-        return null;
+        pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+        return userPointTable.insertOrUpdate(id, amount);
     }
 
     @Override

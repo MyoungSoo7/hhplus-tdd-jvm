@@ -94,6 +94,7 @@ class PointServiceImplTest {
                 now
         );
         userPointTable.insertOrUpdate(id, amount);
+        pointHistoryTable.insert(id, amount, TransactionType.CHARGE, now);
 
 
         // then
@@ -106,6 +107,24 @@ class PointServiceImplTest {
     @Test
     @DisplayName("유저 포인트 사용")
     void useUserPoint() {
+        // given => long id, long amount
+        long id = 1L;
+        long amount = -1000L;
+        Long now = System.currentTimeMillis();
+
+        // when
+        UserPoint initUserPoint = new UserPoint(
+                id,
+                amount,
+                System.currentTimeMillis()
+        );
+        userPointTable.insertOrUpdate(id, amount);
+        pointHistoryTable.insert(id, amount, TransactionType.USE, now);
+
+        // then
+        assertEquals(initUserPoint.id(), id);
+        assertEquals(initUserPoint.point(), amount);
+        assertEquals(initUserPoint.updateMillis(), now);
 
 
     }
