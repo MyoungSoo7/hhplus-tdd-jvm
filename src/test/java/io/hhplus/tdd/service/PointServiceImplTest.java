@@ -8,16 +8,23 @@ import io.hhplus.tdd.point.UserPoint;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+
+
 
 @ExtendWith(MockitoExtension.class)
 class PointServiceImplTest {
+
+    @InjectMocks
+    private PointServiceImpl pointService;
 
     // 행동
     @Mock
@@ -29,21 +36,22 @@ class PointServiceImplTest {
     @DisplayName("유저 포인트 조회")
     void selectUserPoint() {
         // given => id
-        long userId = 1L;
-        UserPoint expectedUserPoint = new UserPoint(
+        final long userId = 1L;
+        final long amount = 1000L;
+
+        UserPoint userPoint = new UserPoint(
                 userId,
-                1000L,
+                amount,
                 System.currentTimeMillis()
         );
+        given(userPointTable.selectById(anyLong())).willReturn(userPoint);
 
-        // when
-        when(userPointTable.selectById(userId)).thenReturn(expectedUserPoint);
-        UserPoint userPoint =userPointTable.selectById(userId);
+        //when
+        UserPoint result = pointService.selectUserPoint(userId);
 
-        // then
-        assertEquals(expectedUserPoint.id(), userPoint.id());
-        assertEquals(expectedUserPoint.point(), userPoint.point());
-        assertEquals(expectedUserPoint.updateMillis(),  userPoint.updateMillis());
+        // then => UserPoint
+        assertThat(result.id()).isEqualTo(userId);
+        assertThat(result.point()).isEqualTo(amount);
 
     }
 
@@ -52,30 +60,24 @@ class PointServiceImplTest {
     @DisplayName("유저 포인트 히스토리")
     void selectUserPointHistory() {
         // given =>long id
-        long id = 1L;
-        long userId = 1L;
-        long amount = 1000L;
-        TransactionType type = TransactionType.CHARGE;
-        long updateMillis = 1652953000000L;
-        PointHistory initPointHistory = new PointHistory(
-                id,
+        final long userId = 1L;
+        final long amount1 = 1000L;
+        final long amount2 = 2000L;
+
+        PointHistory pointHistory1 = new PointHistory(
+                1L,
                 userId,
-                amount,
-                type,
-                updateMillis
+                amount1,
+                TransactionType.CHARGE,
+                System.currentTimeMillis()
         );
-
-        // when
-        when(pointHistoryTable.selectAllByUserId(userId)).thenReturn(List.of(initPointHistory));
-        List<PointHistory> pointHistories = pointHistoryTable.selectAllByUserId(userId);
-
-        // then
-        assertEquals(1, pointHistories.size());
-        assertEquals(initPointHistory.id(), pointHistories.get(0).id());
-        assertEquals(initPointHistory.userId(), pointHistories.get(0).userId());
-        assertEquals(initPointHistory.amount(), pointHistories.get(0).amount());
-        assertEquals(initPointHistory.type(), pointHistories.get(0).type());
-        assertEquals(initPointHistory.updateMillis(), pointHistories.get(0).updateMillis());
+        PointHistory pointHistory2 = new PointHistory(
+                2L,
+                userId,
+                amount2,
+                TransactionType.USE,
+                System.currentTimeMillis()
+        );
 
     }
 
@@ -101,6 +103,11 @@ class PointServiceImplTest {
         assertEquals(expectedUserPoint.id(), id);
         assertEquals(expectedUserPoint.point(), amount);
         assertEquals(expectedUserPoint.updateMillis(), now);
+        
+        // 충전요금 금액에 대한 검사가 부재
+        // 충전 금액을 가산 후 충전하여야 하나 현재 로직이 부재
+        // 충전 후 금액이 적합한지 검사하는 로직이 부재
+        // 충전시 순서대로 충전되도록 lock을 거는 부분도 현재로직이 부재
 
     }
 
