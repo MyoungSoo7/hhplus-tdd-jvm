@@ -51,15 +51,15 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public UserPoint useUserPoint(long id, long amount) {
+    public UserPoint useUserPoint(long id, long usePoint) {
         ReentrantLock lock = lockManager.getLock(id);
         lock.lock();
-
         try {
-            // 충전요금 금액에 대한 검사
             UserPoint currentUserPoint = userPointTable.selectById(id);
-            UserPoint result = userPointTable.insertOrUpdate(currentUserPoint.id(), currentUserPoint.point() - amount);
-            pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+            // 충전요금 금액에 대한 검사
+            UserPoint validUserPoint = currentUserPoint.use(usePoint);
+            UserPoint result = userPointTable.insertOrUpdate(validUserPoint.id(), validUserPoint.point()  );
+            pointHistoryTable.insert(validUserPoint.id(), usePoint, TransactionType.USE, System.currentTimeMillis());
             return result;
         } finally {
             lock.unlock();
