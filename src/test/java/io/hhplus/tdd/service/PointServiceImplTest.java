@@ -121,7 +121,7 @@ class PointServiceImplTest {
         assertThat(result.point()).isEqualTo(beforeCharge.point() + amount);
 
         // 충전 후 금액이 적합한지 검사
-        // 충전시 순서대로 충전되도록 lock을 거는 부분도 현재로직이 부재
+
 
     }
 
