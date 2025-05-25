@@ -12,6 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static io.hhplus.tdd.point.TransactionType.CHARGE;
+import static io.hhplus.tdd.point.TransactionType.USE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -68,16 +72,28 @@ class PointServiceImplTest {
                 1L,
                 userId,
                 amount1,
-                TransactionType.CHARGE,
+                CHARGE,
                 System.currentTimeMillis()
         );
         PointHistory pointHistory2 = new PointHistory(
                 2L,
                 userId,
                 amount2,
-                TransactionType.USE,
+                USE,
                 System.currentTimeMillis()
         );
+
+        //when
+        List<PointHistory> resultList = pointService.selectUserPointHistory(userId);
+
+        //then
+        assertThat(resultList)
+                .hasSize(2)
+                .extracting("id","userId", "amount", "type")
+                .containsExactlyInAnyOrder(
+                        tuple(1L,userId, amount1, CHARGE),
+                        tuple(2L, userId, amount2, USE)
+                );
 
     }
 
@@ -96,7 +112,7 @@ class PointServiceImplTest {
                 now
         );
         userPointTable.insertOrUpdate(id, amount);
-        pointHistoryTable.insert(id, amount, TransactionType.CHARGE, now);
+        pointHistoryTable.insert(id, amount, CHARGE, now);
 
 
         // then
@@ -126,7 +142,7 @@ class PointServiceImplTest {
                 System.currentTimeMillis()
         );
         userPointTable.insertOrUpdate(id, amount);
-        pointHistoryTable.insert(id, amount, TransactionType.USE, now);
+        pointHistoryTable.insert(id, amount, USE, now);
 
         // then
         assertEquals(initUserPoint.id(), id);
