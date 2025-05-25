@@ -120,10 +120,7 @@ class PointServiceImplTest {
         assertThat(result.id()).isEqualTo(userId);
         assertThat(result.point()).isEqualTo(beforeCharge.point() + amount);
 
-        
-        // 충전요금 금액에 대한 검사가 부재
-        // 충전 금액을 가산 후 충전하여야 하나 현재 로직이 부재
-        // 충전 후 금액이 적합한지 검사하는 로직이 부재
+        // 충전 후 금액이 적합한지 검사
         // 충전시 순서대로 충전되도록 lock을 거는 부분도 현재로직이 부재
 
     }
