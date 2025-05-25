@@ -83,6 +83,9 @@ class PointServiceImplTest {
                 System.currentTimeMillis()
         );
 
+        List<PointHistory> historyList = List.of(pointHistory1, pointHistory2);
+        given(pointHistoryTable.selectAllByUserId(userId)).willReturn(historyList);
+
         //when
         List<PointHistory> resultList = pointService.selectUserPointHistory(userId);
 
@@ -143,8 +146,8 @@ class PointServiceImplTest {
         UserPoint usedUserPoint = pointService.chargeUserPoint(beforeUse.id(), usePoint);
 
         // then
-        assertThat(usedUserPoint.point()).isEqualTo(afterUse.point());
-
+        assertThat(usedUserPoint.id()).isEqualTo(userId);
+        assertThat(usedUserPoint.point()).isEqualTo(afterUse.point()  );
 
     }
     
