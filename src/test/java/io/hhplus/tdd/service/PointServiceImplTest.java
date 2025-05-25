@@ -101,24 +101,22 @@ class PointServiceImplTest {
     @DisplayName("유저 포인트 충전")
     void chargeUserPoint() {
         // given => long id, long amount
-        Long id = 1L;
+        Long userId = 1L;
         Long amount = 1000L;
-        Long now = System.currentTimeMillis();
 
-        // when
-        UserPoint expectedUserPoint = new UserPoint(
-                id,
-                amount,
-                now
-        );
-        userPointTable.insertOrUpdate(id, amount);
-        pointHistoryTable.insert(id, amount, CHARGE, now);
+        UserPoint beforeCharge = new UserPoint(userId, amount, System.currentTimeMillis());
+        UserPoint afterCharge = new UserPoint(userId, beforeCharge.point() + amount, System.currentTimeMillis());
 
+        given(userPointTable.selectById(anyLong())).willReturn(beforeCharge);
+        given(userPointTable.insertOrUpdate(anyLong(), anyLong())).willReturn(afterCharge);
 
-        // then
-        assertEquals(expectedUserPoint.id(), id);
-        assertEquals(expectedUserPoint.point(), amount);
-        assertEquals(expectedUserPoint.updateMillis(), now);
+        //when
+        UserPoint result = pointService.chargeUserPoint(userId, amount);
+
+        //then
+        assertThat(result.id()).isEqualTo(userId);
+        assertThat(result.point()).isEqualTo(beforeCharge.point() + amount);
+
         
         // 충전요금 금액에 대한 검사가 부재
         // 충전 금액을 가산 후 충전하여야 하나 현재 로직이 부재
@@ -131,30 +129,24 @@ class PointServiceImplTest {
     @DisplayName("유저 포인트 사용")
     void useUserPoint() {
         // given => long id, long amount
-        long id = 1L;
-        long amount = -1000L;
-        Long now = System.currentTimeMillis();
+        long userId = 1L;
+        long amount = 5000L;
+        long usePoint = 1000L;
+
+        UserPoint beforeUse = new UserPoint(userId, amount, System.currentTimeMillis());// 사용 전 유저 정보
+        UserPoint afterUse = new UserPoint(userId, amount - usePoint, System.currentTimeMillis());// 사용 후 유저 정보
+
+        given(userPointTable.selectById(anyLong())).willReturn(beforeUse);
+        given(userPointTable.insertOrUpdate(anyLong(), anyLong())).willReturn(afterUse);
 
         // when
-        UserPoint initUserPoint = new UserPoint(
-                id,
-                amount,
-                System.currentTimeMillis()
-        );
-        userPointTable.insertOrUpdate(id, amount);
-        pointHistoryTable.insert(id, amount, USE, now);
+        UserPoint usedUserPoint = pointService.chargeUserPoint(beforeUse.id(), usePoint);
 
         // then
-        assertEquals(initUserPoint.id(), id);
-        assertEquals(initUserPoint.point(), amount);
-        assertEquals(initUserPoint.updateMillis(), now);
+        assertThat(usedUserPoint.point()).isEqualTo(afterUse.point());
 
 
-    }
-
-
-    
-    
+    } 
     
 
 }
