@@ -146,7 +146,7 @@ class PointServiceImplTest {
         assertThat(usedUserPoint.point()).isEqualTo(afterUse.point());
 
 
-    } 
+    }
     
 
 }
